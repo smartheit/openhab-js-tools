@@ -1,7 +1,7 @@
 # openHAB JavaScript Tools by smartheit
 
-This library provides utilities for the openHAB JavaScript Scripting Add-on.
-It provides foundational tooling for many projects at [smartheit GmbH](https://smartheit.com/).
+This library provides utilities for the openHAB JavaScript Scripting Add-on,
+being used for projects at [smartheit GmbH](https://smartheit.com/).
 
 ## Compatibility
 

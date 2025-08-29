@@ -2,3 +2,4 @@
 
 export const revpi: typeof import("./revpi");
 export const sms: typeof import("./sms");
+export const thingsx: typeof import("./thingsx");

@@ -1,3 +1,4 @@
 module.exports = {
-  get revpi () { return require('./revpi'); }
+  get revpi () { return require('./revpi'); },
+  get sms () { return require('./sms'); }
 };

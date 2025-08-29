@@ -1,0 +1,16 @@
+.github
+.idea
+.vscode
+
+build
+dist
+docs
+test
+
+types/index.d.ts*
+
+.eslintrc.js
+.gitattributes
+.gitignore
+.nvmrc
+smartheit-*.tgz

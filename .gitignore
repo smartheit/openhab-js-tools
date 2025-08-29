@@ -1,0 +1,7 @@
+.idea
+.vscode
+dist
+docs
+node_modules
+test/coverage
+smartheit-*.tgz

@@ -7,8 +7,6 @@ dist
 docs
 test
 
-types/index.d.ts*
-
 .eslintrc.js
 .gitattributes
 .gitignore

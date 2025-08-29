@@ -1,15 +1,20 @@
 {
-  "name": "smartheit",
+  "name": "@smartheit/openhab-tools",
   "version": "0.0.1",
   "description": "Tools for JavaScript Scripting by smartheit",
   "keywords": [
     "openHAB",
-    "smarthome"
+    "Smart Home",
+    "Home Automation"
   ],
   "license": "EPL-2.0",
   "author": "smartheit GmbH",
   "main": "src/index.js",
   "types": "types/smartheit.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smartheit/openhab-js-tools.git"
+  },
   "scripts": {
     "lint": "npx eslint src",
     "lint:fix": "npx eslint --fix src",

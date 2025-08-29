@@ -91,4 +91,4 @@ Copy the tarball to the `$OPENHAB_CONF/etc/automation/js` folder and run `npm in
 
 ### Deploy as Bundle
 
-Copy the `smartheit.js` file from the [`dist`](dist) folder into `$OPENHAB_CONF/etc/automation/js/node_modules`.
+Copy the `openhab-tools.js` file from the [`dist/@smartheit`](dist/@smartheit) folder into `$OPENHAB_CONF/etc/automation/js/node_modules/@smartheit`.

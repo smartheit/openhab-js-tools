@@ -32,9 +32,9 @@ module.exports = {
   ],
   output: {
     path: path.resolve(__dirname, '../dist'),
-    filename: 'smartheit.js',
+    filename: '@smartheit/openhab-tools.js',
     library: {
-      name: 'smartheit',
+      name: '@smartheit/openhab-tools',
       type: 'umd'
     },
     globalObject: 'this'

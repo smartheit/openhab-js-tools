@@ -8,7 +8,11 @@ It provides foundational tooling for many projects at [smartheit GmbH](https://s
 - This library is developed for the openHAB 4.3.x series.
 - It depends on `openhab` == 5.9.0, requiring manual installation on the openHAB 4.3.x series.
   Run `npm i openhab@5.9.0` inside `$OPENHAB_CONF/automation/js` to install it.
-- Parts of the library require additional code that can't be shipped with the library, but this will be clearly noted then.
+- Parts of the library require additional code that can't be shipped with the library, but this will be clearly noted below.
+
+### Additional Dependencies
+
+- The `setLedColor` method of the `revpi` namespace requires the [`revpi_leds.sh`](doc/revpi_leds.sh) script to be placed in `$OPENHAB_CONF/script`.
 
 ## Development
 
@@ -88,12 +92,3 @@ Copy the tarball to the `$OPENHAB_CONF/etc/automation/js` folder and run `npm in
 ### Deploy as Bundle
 
 Copy the `smartheit.js` file from the [`dist`](dist) folder into `$OPENHAB_CONF/etc/automation/js/node_modules`.
-
-
-## API
-
-### `revpi`
-
-The `revpi` namespace provides tools related to the RevPi industrial Raspberry Pi modules.
-
-The `setLedColor` method requires the [`revpi_leds.sh`](doc/revpi_leds.sh) script to be placed in `$OPENHAB_CONF/script`.

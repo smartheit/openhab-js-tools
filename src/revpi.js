@@ -5,7 +5,7 @@
  * @namespace revpi
  */
 
-const { actions } = require('openhab');
+const { actions, time } = require('openhab');
 
 /**
  * @type {Object}
@@ -45,8 +45,11 @@ function setLedColor (script, led, color) {
       break;
   }
 
-  actions.Exec.executeCommandLine(script, led + '_green', greenValue.toString());
-  actions.Exec.executeCommandLine(script, led + '_red', redValue.toString());
+  const resultGreen = actions.Exec.executeCommandLine(time.Duration.ofSeconds(1), script, led + '_green', greenValue.toString());
+  const resultRed = actions.Exec.executeCommandLine(time.Duration.ofSeconds(1), script, led + '_red', redValue.toString());
+  if (resultGreen !== null || resultRed !== null) {
+    console.error('Error setting RevPI LED color: ' + resultGreen ?? resultRed);
+  }
 }
 
 module.exports = {

@@ -23,6 +23,8 @@ const RevPiLedColor = {
 /**
  * Sets the color of a RevPi LED by calling the `revpi_leds.sh` script.
  *
+ * <p>Proper permissions on `/sys/devices/platform/leds/leds/.../brightness` must be set to allow write-access to the user running openHAB.
+ *
  * @memberOf revpi
  * @param {string} script the path to the `revpi_leds.sh` script
  * @param {string} led the name of the LED, e.g. `a1` or `a2`
@@ -47,8 +49,8 @@ function setLedColor (script, led, color) {
 
   const resultGreen = actions.Exec.executeCommandLine(time.Duration.ofSeconds(1), script, led + '_green', greenValue.toString());
   const resultRed = actions.Exec.executeCommandLine(time.Duration.ofSeconds(1), script, led + '_red', redValue.toString());
-  if (resultGreen !== null || resultRed !== null) {
-    console.error('Error setting RevPI LED color: ' + resultGreen ?? resultRed);
+  if (resultGreen || resultRed) {
+    console.error('Error setting RevPI LED color: ' + resultGreen || resultRed);
   }
 }
 

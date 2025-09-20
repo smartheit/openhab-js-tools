@@ -12,7 +12,13 @@ being used for projects at [smartheit GmbH](https://smartheit.com/).
 
 ### Additional Dependencies
 
-- The `setLedColor` method of the `revpi` namespace requires the [`revpi_leds.sh`](doc/revpi_leds.sh) script to be placed in `$OPENHAB_CONF/script`.
+- The `setLedColor` method of the `revpi` namespace requires:
+  - the [`revpi_leds.sh`](doc/revpi_leds.sh) script to be placed in `$OPENHAB_CONF/script`.
+  - write-access to `/sys/devices/platform/leds/leds/*/brightness` for the user running openHAB (usually that will be `smartheit`).<br>
+    This can be achieved through an udev rule. Create a file `/etc/udev/rules.d/99-leds.rules` with the following content:
+    ```text
+    SUBSYSTEM=="leds", KERNEL=="*", ATTR{brightness}=="*", MODE="0644", RUN+="/bin/chown root:smartheit /sys/class/leds/%k/brightness", RUN+="/bin/chmod 0664 /sys/class/leds/%k/brightness"
+    ```
 
 ## Development
 

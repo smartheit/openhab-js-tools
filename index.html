@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>Home - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="messaging.html">messaging</a><ul class='methods'><li data-type='method'><a href="messaging.html#.sendSMSWithSMSUp">sendSMSWithSMSUp</a></li></ul></li><li><a href="revpi.html">revpi</a><ul class='members'><li data-type='member'><a href="revpi.html#.RevPiLedColor">RevPiLedColor</a></li></ul><ul class='methods'><li data-type='method'><a href="revpi.html#.setLedColor">setLedColor</a></li></ul></li><li><a href="thingsx.html">thingsx</a><ul class='methods'><li data-type='method'><a href="thingsx.html#.createThingStatusToItemRule">createThingStatusToItemRule</a></li></ul></li><li><a href="utils.html">utils</a><ul class='methods'><li data-type='method'><a href="utils.html#.interpretBigIntAsString">interpretBigIntAsString</a></li></ul></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+
+    
+
+
+
+    
+
+
+    <section class="package">
+        <h3>@smartheit/openhab-tools 0.0.1</h3>		
+    </section>
+
+
+
+
+
+
+
+
+
+    
+
+
+
+    <section class="readme usertext">
+        <article><h1>openHAB JavaScript Tools by smartheit</h1>
+<p>This library provides utilities for the openHAB JavaScript Scripting Add-on,
+being used for projects at <a href="https://smartheit.com/">smartheit GmbH</a>.</p>
+<h2>Compatibility</h2>
+<ul>
+<li>This library is developed for the openHAB 4.3.x series.</li>
+<li>It depends on <code>openhab</code> == 5.9.0, requiring manual installation on the openHAB 4.3.x series.
+Run <code>npm i openhab@5.9.0</code> inside <code>$OPENHAB_CONF/automation/js</code> to install it.</li>
+<li>Parts of the library require additional code that can't be shipped with the library, but this will be clearly noted below.</li>
+</ul>
+<h3>Additional Dependencies</h3>
+<ul>
+<li>The <code>setLedColor</code> method of the <code>revpi</code> namespace requires:
+<ul>
+<li>the <a href="doc/revpi_leds.sh"><code>revpi_leds.sh</code></a> script to be placed in <code>$OPENHAB_CONF/script</code>.</li>
+<li>write-access to <code>/sys/devices/platform/leds/leds/*/brightness</code> for the user running openHAB (usually that will be <code>smartheit</code>).<br>
+This can be achieved through an udev rule. Create a file <code>/etc/udev/rules.d/99-leds.rules</code> with the following content:<pre class="prettyprint source lang-text"><code>SUBSYSTEM==&quot;leds&quot;, KERNEL==&quot;*&quot;, ATTR{brightness}==&quot;*&quot;, MODE=&quot;0644&quot;, RUN+=&quot;/bin/chown root:smartheit /sys/class/leds/%k/brightness&quot;, RUN+=&quot;/bin/chmod 0664 /sys/class/leds/%k/brightness&quot;
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h2>Development</h2>
+<h3>Dev Environment</h3>
+<p>You need <a href="https://nodejs.org/">Node.js</a>, version as stated in <a href=".nvmrc"><code>.nvmrc</code></a>, and npm installed.
+It is required to use this version as well in your development environment, otherwise you could cause trouble.</p>
+<p>Maintainers therefore recommend to use a Node.js version manager, e.g. <a href="https://github.com/nvm-sh/nvm">nvm-sh/nvm</a>.
+After you've installed it, run <code>nvm use</code> to use the correct Node.js version.</p>
+<p>openhab-js has several (development) dependencies which are required.</p>
+<p>Run <code>npm install</code> to install those dependencies.</p>
+<h3>Code Style</h3>
+<p><a href="https://github.com/standard/semistandard"><img src="https://img.shields.io/badge/code%20style-semistandard-brightgreen.svg" alt="js-semistandard-style"></a></p>
+<p><a href="https://eslint.org/"><code>eslint</code></a> is being used with the <a href="https://github.com/standard/semistandard">JavaScript semistandard style</a> and some overrides for code linting and formatting.</p>
+<p>Run the linter with:</p>
+<pre class="prettyprint source lang-shell"><code>npm run lint
+</code></pre>
+<p>Automatically fix issues with:</p>
+<pre class="prettyprint source lang-shell"><code>npm run lint:fix
+</code></pre>
+<h3>TypeScript</h3>
+<p>Although TypeScript is not used for writing the source code, it is still used for emitting declarations and thereby enabling great IntelliSense when using the library.</p>
+<p>Generate the types with:</p>
+<pre class="prettyprint source lang-shell"><code>npm run types
+</code></pre>
+<p>Test the generated definitions for problems:</p>
+<pre class="prettyprint source lang-shell"><code>npm run types:test
+</code></pre>
+<h3>Testing</h3>
+<p><a href="https://jestjs.io/">Jest</a> is being used for unit tests, which are placed in the <code>test</code> folder and have the extension <code>.spec.js</code>.
+Have a look at the <a href="https://jestjs.io/docs/getting-started">Jest Documentation</a> and the existing tests to get an idea how Jest works.</p>
+<h3>Development TL:DR;</h3>
+<p>To run the linter, generate &amp; test type definitions, run unit tests, generate JSDoc and build the bundled file, run:</p>
+<pre class="prettyprint source lang-shell"><code>npm run build
+</code></pre>
+<h2>Deployment</h2>
+<p>To deploy this library to the <code>$OPENHAB_CONF/etc/automation/js/node_modules</code> folder of the openHAB server, you have two options.</p>
+<h3>Deploy as Tarball</h3>
+<p>Pack the library as tarball:</p>
+<pre class="prettyprint source lang-shell"><code>npm pack
+</code></pre>
+<p>Copy the tarball to the <code>$OPENHAB_CONF/etc/automation/js</code> folder and run <code>npm install smartheit-openhab-tools-x.y.z.tgz</code>.</p>
+<h3>Deploy as Bundle</h3>
+<p>Copy the <code>openhab-tools.js</code> file from the <a href="dist/@smartheit"><code>dist/@smartheit</code></a> folder into <code>$OPENHAB_CONF/etc/automation/js/node_modules/@smartheit</code>.</p></article>
+    </section>
+
+
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.4</a> on Fri Nov 07 2025 13:46:37 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+
+</body>
+</html>

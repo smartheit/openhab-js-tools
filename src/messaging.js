@@ -1,8 +1,8 @@
 /**
- * SMS namespace
+ * Messaging namespace
  *
- * This namespace provides tools for sending SMS messages.
- * @namespace sms
+ * This namespace provides tools for sending messages through third-party services.
+ * @namespace messaging
  */
 
 const { actions } = require('openhab');
@@ -10,14 +10,14 @@ const { actions } = require('openhab');
 /**
  * Sends an SMS using {@link https://smsup.ch}.
  *
- * @memberOf sms
+ * @memberOf messaging
  * @param {string} token the authorization token
  * @param {string} sender identifier of the sender
  * @param {string} recipient phone number of the recipient
  * @param {string} text the text to send
  * @returns {boolean} whether the SMS was sent successfully
  */
-function sendSMS (token, sender, recipient, text) {
+function sendSMSWithSMSUp (token, sender, recipient, text) {
   // See https://doc.smsup.ch/de/api/sms/versand/einzel-sms for API documentation.
   const headers = {
     Accept: 'application/json',
@@ -41,5 +41,5 @@ function sendSMS (token, sender, recipient, text) {
 }
 
 module.exports = {
-  sendSMS
+  sendSMSWithSMSUp
 };

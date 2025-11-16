@@ -4,6 +4,7 @@
 
 build
 dist
+doc
 docs
 test
 
@@ -11,4 +12,5 @@ test
 .gitattributes
 .gitignore
 .nvmrc
+jest.config.js
 smartheit-*.tgz

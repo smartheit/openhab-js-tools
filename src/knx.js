@@ -1,0 +1,120 @@
+class Group {
+  constructor (start, end, size) {
+    this.start = start;
+    this.end = end;
+    this.size = size;
+  }
+}
+
+/**
+ * Decodes the sector byte.
+ * @param {number} b raw sector byte (0-255)
+ * @returns {number|Group|string} the sector number, group of sectors, or 'reserved' if reserved byte
+ */
+function decodeSector (b) {
+  if (b === 0) return 'reserved';
+
+  // Check if the least significant bit is 1 (individual sector)
+  if ((b & 0x01) === 1) {
+    return (b >> 1) + 1;
+  }
+
+  // Group of sectors
+  const groupSize = b & -b; // Lowest set bit value
+
+  // Calculate shift based on the position of the lowest set bit
+  const shift = groupSize.toString(2).length;
+  const baseSector = (b >> shift) * groupSize;
+
+  return new Group(baseSector, baseSector + groupSize, groupSize);
+}
+
+/**
+ * Decodes the command byte.
+ * @param {number} b raw sector byte (0-255)
+ * @returns {{ raw: number, type: string }} raw value and human-readable type
+ */
+function decodeCommand (b) {
+  const raw = b >> 2;
+  let type = null;
+  switch (raw) {
+    case 1:
+      type = 'fahrbefehl';
+      break;
+  }
+  return {
+    raw,
+    type
+  };
+}
+
+/**
+ * Decodes the P1 byte.
+ * @param {number} p1 raw P1 byte
+ * @returns {{priority: number, type: string|null}} priority and type
+ */
+function decodeP1 (p1) {
+  const priority = p1 >> 4; // shift right by 4 to get the upper nibble
+
+  let type = null;
+  switch (priority) {
+    case 0:
+    case 1:
+      // Limit/Boundary Command
+      type = 'grenzbefehl';
+      break;
+    case 2:
+    case 3:
+      // Automatic (Sun/Time)
+      type = 'automatikbefehl';
+      break;
+    case 6:
+    case 7:
+      // Priority Override
+      type = 'prioritaetsbefehl';
+      break;
+    case 8:
+    case 9:
+      // Warning (e.g., Wind/Rain)
+      type = 'warnbefehl';
+      break;
+    case 10:
+    case 11:
+      // Safety Lock
+      type = 'sicherheitsbefehl';
+      break;
+    case 12:
+    case 13:
+      // Danger/Emergency
+      type = 'gefahrenbefehl';
+      break;
+  }
+
+  return {
+    priority,
+    type
+  };
+}
+
+/**
+ * Decode a Grieesser object from a hex string.
+ * @param hex
+ * @return {{sector: number|Group|string, command: {raw: number, type: string}, priority: {priority: number, type: (string|null)}}}
+ */
+function decodeGriesserObject (hex) {
+  const bytes = hex
+    .replace(/\s+/g, '') // Remove spaces
+    .match(/.{1,2}/g) // Chunk into pairs
+    .map(h => parseInt(h, 16));
+  if (!bytes || bytes.length !== 6) throw new Error('Invalid hex string');
+
+  return {
+    sector: decodeSector(bytes[0]),
+    command: decodeCommand(bytes[1]),
+    priority: decodeP1(bytes[2])
+  };
+}
+
+module.exports = {
+  decodeGriesserObject
+};

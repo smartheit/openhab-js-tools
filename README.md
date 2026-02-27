@@ -1,5 +1,8 @@
 # openHAB JavaScript Tools by smartheit
 
+[![Build Status](https://github.com/smartheit/openhab-js-tools/actions/workflows/build.yaml/badge.svg)](https://github.com/smartheit/openhab-js-tools/actions/workflows/build.yaml)
+[![npm version](https://badge.fury.io/js/@smartheit%2Fopenhab-tools.svg)](https://badge.fury.io/js/@smartheit%2Fopenhab-tools)
+
 This library provides utilities for the openHAB JavaScript Scripting Add-on,
 being used for projects at [smartheit GmbH](https://smartheit.com/).
 
@@ -84,6 +87,11 @@ npm run build
 ## Deployment
 
 To deploy this library to the `$OPENHAB_CONF/etc/automation/js/node_modules` folder of the openHAB server, you have two options.
+
+### Install from npm
+
+1. Go into the `$OPENHAB_CONF/etc/automation/js` directory.
+1. Install with the `npm install @smartheit/openhab-tools` command.
 
 ### Deploy as Tarball
 

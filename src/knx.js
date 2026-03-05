@@ -99,19 +99,20 @@ function decodeP1 (p1) {
 /**
  * Decode a Grieesser object from a hex string.
  * @param hex
- * @return {{sector: number|Group|string, command: {raw: number, type: string}, priority: {priority: number, type: (string|null)}}}
+ * @return {{sector: number|Group|string, command: {raw: number, type: string}, priority: {priority: number, type: (string|null)}, raw: string}}
  */
 function decodeGriesserObject (hex) {
-  const bytes = hex
+  const hexBytes = hex
     .replace(/\s+/g, '') // Remove spaces
-    .match(/.{1,2}/g) // Chunk into pairs
-    .map(h => parseInt(h, 16));
+    .match(/.{1,2}/g); // Chunk into pairs
+  const bytes = hexBytes.map(h => parseInt(h, 16));
   if (!bytes || bytes.length !== 6) throw new Error('Invalid hex string');
 
   return {
     sector: decodeSector(bytes[0]),
     command: decodeCommand(bytes[1]),
-    priority: decodeP1(bytes[2])
+    priority: decodeP1(bytes[2]),
+    raw: hexBytes.map(h => h.toUpperCase()).join(' ')
   };
 }
 

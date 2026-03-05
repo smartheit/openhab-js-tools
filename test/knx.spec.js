@@ -8,12 +8,14 @@ describe('knx', () => {
       expect(result.sector).toBe(36);
       expect(result.command.raw).toBe(1);
       expect(result.priority.priority).toBe(6);
+      expect(result.raw).toBe(hex);
 
       hex = '07 04 65 00 00 00';
       result = decodeGriesserObject(hex);
       expect(result.sector).toBe(4);
       expect(result.command.raw).toBe(1);
       expect(result.priority.priority).toBe(6);
+      expect(result.raw).toBe(hex);
     });
 
 

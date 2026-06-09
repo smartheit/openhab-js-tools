@@ -7,7 +7,7 @@ describe('knx', () => {
       const result = decodeGriesserObject(hex);
       expect(result.sector).toBe(36);
       expect(result.command.raw).toBe(1);
-      expect(result.command.type).toBe('drive command');
+      expect(result.command.type).toBe('Fahrbefehl');
       expect(result.priority).toBeNull();
       expect(result.byte0).toBe(0x47);
       expect(result.byte1).toBe(0x04);
@@ -18,21 +18,21 @@ describe('knx', () => {
       expect(result.sectorCode).toBe(71);
       expect(result.commandCode).toBe(1);
       expect(result.sectors).toEqual([36]);
-      expect(result.data).toBe('fixed position P4 approach');
+      expect(result.data).toEqual({ aktion: 'Fixposition Pn anfahren', position: 4 });
       expect(result.raw).toBe(hex);
     });
 
-    test('decodes a valid hex string correctly (drive command with fallback data)', () => {
+    test('decodes a valid hex string correctly (drive command with wippen)', () => {
       const hex = '07 04 65 00 00 00';
       const result = decodeGriesserObject(hex);
       expect(result.sector).toBe(4);
       expect(result.command.raw).toBe(1);
-      expect(result.command.type).toBe('drive command');
+      expect(result.command.type).toBe('Fahrbefehl');
       expect(result.priority).toBeNull();
       expect(result.sectorCode).toBe(7);
       expect(result.commandCode).toBe(1);
       expect(result.sectors).toEqual([4]);
-      expect(result.data).toBe('Unknown drive command 5');
+      expect(result.data).toEqual({ aktion: 'Wippen Auf', wippdauer: 0 });
       expect(result.raw).toBe(hex);
     });
 
@@ -43,9 +43,9 @@ describe('knx', () => {
       expect(result.sectorCode).toBe(513);
       expect(result.sectors).toEqual([257]);
       expect(result.commandCode).toBe(5);
-      expect(result.command.type).toBe('operation code');
+      expect(result.command.type).toBe('Bedienungs Code');
       expect(result.priority).toBeNull();
-      expect(result.data).toEqual(['localoperation', 'short up']);
+      expect(result.data).toEqual({ bedienung: 'Lokalbedienung', unterbefehl: 'Kurz auf' });
     });
 
     test('decodes priority override strings when commandCode is 0', () => {
@@ -55,10 +55,10 @@ describe('knx', () => {
       expect(result.sectorCode).toBe(5);
       expect(result.sectors).toEqual([3]);
       expect(result.commandCode).toBe(0);
-      expect(result.command.type).toBe('unknown value for function: 0');
+      expect(result.command.type).toBe('unbekannter Befehl: 0');
       expect(result.priority.raw).toBe(3);
-      expect(result.priority.type).toBe('priority command');
-      expect(result.data).toBe('unknown value for command: 0');
+      expect(result.priority.type).toBe('Prioritätsbefehl');
+      expect(result.data).toEqual({ error: 'unbekannter Befehl: 0' });
     });
 
     test('decodes group sectors correctly', () => {
@@ -70,24 +70,24 @@ describe('knx', () => {
       expect(result.sector.end).toBe(8);
       expect(result.sector.size).toBe(4);
       expect(result.priority.raw).toBe(0);
-      expect(result.priority.type).toBe('border command');
+      expect(result.priority.type).toBe('Randbefehl');
     });
 
     describe('decodes examples from official Griesser GPA ETS App logs', () => {
       test('ID 1: 3F 15 81 00 00 00', () => {
         const result = decodeGriesserObject('3F 15 81 00 00 00');
         expect(result.sectors).toEqual([160]);
-        expect(result.command.type).toBe('operation code');
+        expect(result.command.type).toBe('Bedienungs Code');
         expect(result.priority).toBeNull();
-        expect(result.data).toEqual(['localoperation', 'long down']);
+        expect(result.data).toEqual({ bedienung: 'Lokalbedienung', unterbefehl: 'Lang ab' });
       });
 
       test('ID 4: B3 04 03 02 00 00', () => {
         const result = decodeGriesserObject('B3 04 03 02 00 00');
         expect(result.sectors).toEqual([90]);
-        expect(result.command.type).toBe('drive command');
+        expect(result.command.type).toBe('Fahrbefehl');
         expect(result.priority).toBeNull();
-        expect(result.data).toBe('fixed position P2 approach');
+        expect(result.data).toEqual({ aktion: 'Fixposition Pn anfahren', position: 2 });
       });
 
       test('ID 11: 20 59 00 FF 00 FF', () => {
@@ -96,14 +96,14 @@ describe('knx', () => {
         expect(result.sectors.length).toBe(32);
         expect(result.sectors[0]).toBe(129);
         expect(result.sectors[31]).toBe(160);
-        expect(result.command.type).toBe('driving range limits for automatic drive commands');
+        expect(result.command.type).toBe('Fahrbereichsgrenzen für Automatiktasterbefehle');
         expect(result.priority).toBeNull();
-        expect(result.data).toEqual([
-          'min. angle: 0',
-          'max. angle: 255',
-          'min. height: 0',
-          'max. height: 255'
-        ]);
+        expect(result.data).toEqual({
+          minWinkel: 0,
+          maxWinkel: 255,
+          minBehanghoehe: 0,
+          maxBehanghoehe: 255
+        });
       });
 
       test('ID 39: 20 11 01 00 00 00', () => {
@@ -112,9 +112,9 @@ describe('knx', () => {
         expect(result.sectors.length).toBe(32);
         expect(result.sectors[0]).toBe(129);
         expect(result.sectors[31]).toBe(160);
-        expect(result.command.type).toBe('set/delete lock');
+        expect(result.command.type).toBe('Sperre setzen/löschen');
         expect(result.priority).toBeNull();
-        expect(result.data).toBe('driving command');
+        expect(result.data).toEqual({ aktion: 'Sperre löschen', targets: ['Fahrbefehlsperre'] });
       });
 
       test('ID 42: 60 4D 00 FF 00 FF', () => {
@@ -123,14 +123,14 @@ describe('knx', () => {
         expect(result.sectors.length).toBe(32);
         expect(result.sectors[0]).toBe(161);
         expect(result.sectors[31]).toBe(192);
-        expect(result.command.type).toBe('driving range limits for safety drive commands');
+        expect(result.command.type).toBe('Fahrbereichsgrenzen für Sicherheitstasterbefehle');
         expect(result.priority).toBeNull();
-        expect(result.data).toEqual([
-          'min. angle: 0',
-          'max. angle: 255',
-          'min. height: 0',
-          'max. height: 255'
-        ]);
+        expect(result.data).toEqual({
+          minWinkel: 0,
+          maxWinkel: 255,
+          minBehanghoehe: 0,
+          maxBehanghoehe: 255
+        });
       });
 
       test('ID 44: 60 2D 00 00 00 00', () => {
@@ -139,9 +139,9 @@ describe('knx', () => {
         expect(result.sectors.length).toBe(32);
         expect(result.sectors[0]).toBe(161);
         expect(result.sectors[31]).toBe(192);
-        expect(result.command.type).toBe('bus monitoring');
+        expect(result.command.type).toBe('Busüberwachung');
         expect(result.priority).toBeNull();
-        expect(result.data).toBe('bus monitoring Off');
+        expect(result.data).toEqual({ aktion: 'Überwachung aus' });
       });
 
       test('ID 45: 60 09 00 14 00 00', () => {
@@ -150,9 +150,9 @@ describe('knx', () => {
         expect(result.sectors.length).toBe(32);
         expect(result.sectors[0]).toBe(161);
         expect(result.sectors[31]).toBe(192);
-        expect(result.command.type).toBe('value correction');
+        expect(result.command.type).toBe('Wertkorrektur');
         expect(result.priority).toBeNull();
-        expect(result.data).toBe('value correction, absolute position 100 %');
+        expect(result.data).toEqual({ aktion: 'Wertkorrektur', positionAbsolutPercent: 100 });
       });
     });
 

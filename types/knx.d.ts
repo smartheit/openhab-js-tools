@@ -1,5 +1,8 @@
 /**
  * Decode a Griesser object from a hex string.
+ *
+ * Decoding is based on the official _KNX Non-Standard Datapoint Type Description Form_ filed by Griesser.
+ *
  * @param {string} hex
  * @returns {{
  *   sector: number|Group|string,

@@ -79,31 +79,31 @@ function decodeGriesserSector (sectorCode) {
 }
 
 /**
- * Returns the English command name for a command code.
+ * Returns the German command name for a command code.
  * @param {number} command
  * @returns {string}
  */
 function griesserCommand (command) {
   switch (command) {
-    case 1: return 'drive command';
-    case 2: return 'value correction';
-    case 3: return 'automatic state';
-    case 4: return 'set/delete lock';
-    case 5: return 'operation code';
-    case 6: return 'set scene';
-    case 7: return 'special command';
-    case 8: return 'date';
-    case 9: return 'sync time';
-    case 10: return 'sensor reading notification';
-    case 11: return 'bus monitoring';
-    case 16: return 'driving range limits for safety drive commands';
-    case 17: return 'driving range limits for safety drive commands';
-    case 19: return 'driving range limits for safety drive commands';
-    case 20: return 'driving range limits for safety drive commands';
-    case 22: return 'driving range limits for automatic drive commands';
-    case 23: return 'driving range limits for automatic drive commands';
-    case 24: return 'driving range limits for automatic drive commands';
-    default: return 'unknown value for function: ' + command;
+    case 1: return 'Fahrbefehl';
+    case 2: return 'Wertkorrektur';
+    case 3: return 'Automatikzustand';
+    case 4: return 'Sperre setzen/löschen';
+    case 5: return 'Bedienungs Code';
+    case 6: return 'Szene setzen';
+    case 7: return 'Sonderbefehl';
+    case 8: return 'Datum';
+    case 9: return 'Zeit synchronisieren';
+    case 10: return 'Sensorwertmitteilung';
+    case 11: return 'Busüberwachung';
+    case 16: return 'Fahrbereichsgrenzen für Sicherheitsfahrbefehle';
+    case 17: return 'Fahrbereichsgrenzen für Sicherheitsfahrbefehle';
+    case 19: return 'Fahrbereichsgrenzen für Sicherheitstasterbefehle';
+    case 20: return 'Fahrbereichsgrenzen für Sicherheitstasterbefehle';
+    case 22: return 'Fahrbereichsgrenzen für Automatiktasterbefehle';
+    case 23: return 'Fahrbereichsgrenzen für Automatiktasterbefehle';
+    case 24: return 'Fahrbereichsgrenzen für Automatiktasterbefehle';
+    default: return 'unbekannter Befehl: ' + command;
   }
 }
 
@@ -144,19 +144,19 @@ function griesserSectors (sectorCode) {
 }
 
 /**
- * Decodes the English priority description.
+ * Decodes the German priority description.
  * @param {number} prioCommand priority command / executions
  * @returns {string}
  */
 function griesserPrio (prioCommand) {
   switch (prioCommand) {
-    case 0: return 'border command';
-    case 1: return 'automatic command';
-    case 3: return 'priority command';
-    case 4: return 'warning command';
-    case 5: return 'security command';
-    case 6: return 'danger command';
-    default: return 'unknown priority ' + prioCommand;
+    case 0: return 'Randbefehl';
+    case 1: return 'Automatikbefehl';
+    case 3: return 'Prioritätsbefehl';
+    case 4: return 'Warnungsbefehl';
+    case 5: return 'Sicherheitsbefehl';
+    case 6: return 'Gefahrenbefehl';
+    default: return 'unbekannte Priorität ' + prioCommand;
   }
 }
 
@@ -187,77 +187,121 @@ function decodeGriesserPrio (commandCode, byte2) {
 function griesserParameter (command, byte2, byte3, byte4, byte5) {
   let commandOperation;
   switch (command) {
-    case 1: // drive command
+    case 1: // Fahrbefehl
       switch (byte2 &amp; 31) {
-        case 0: return 'no driving movement';
-        case 1: return 'upper end position';
-        case 2: return 'lower end position';
+        case 0: return { aktion: 'keine Fahrbewegung' };
+        case 1: return { aktion: 'obere Endlage' };
+        case 2: return { aktion: 'untere Endlage' };
         case 3:
           if ((byte3 >= 1) &amp;&amp; (byte3 &lt;= 4)) {
-            return 'fixed position P' + byte3 + ' approach';
+            return { aktion: 'Fixposition Pn anfahren', position: byte3 };
           } else {
-            return 'Unknown value for Pn ' + byte3;
+            return { aktion: 'unbekannter Wert für Pn', position: byte3 };
           }
+        case 4: return { aktion: 'nicht verwendet' };
+        case 5: return { aktion: 'Wippen Auf', wippdauer: byte3 };
+        case 6: return { aktion: 'Wippen Ab', wippdauer: byte3 };
+        case 7: return { aktion: 'Stop' };
+        case 8: return { aktion: 'Position anfahren', behanghoehe: byte3, lamellenwinkel: byte4 };
+        case 9: return { aktion: 'Behanghöhe anfahren', behanghoehe: byte3 };
+        case 10: return { aktion: 'Lamellen stellen', lamellenwinkel: byte3 };
+        case 11: return { aktion: 'Szene abrufen', szenenNr: byte3 };
+        case 12: {
+          const schaltausgangMap = { 0: 'aus', 1: 'ein', 2: 'umschalten' };
+          return { aktion: 'Schaltausgang', status: schaltausgangMap[byte3] || ('unbekannt ' + byte3) };
+        }
+        case 13: return { aktion: 'Parametrierte Sicherheitsposition', nummer: byte3 };
         default:
-          return 'Unknown drive command ' + (byte2 &amp; 31);
+          return { aktion: 'unbekannter Fahrbefehl', wert: (byte2 &amp; 31) };
       }
-    case 2: // value correction
+    case 2: // Wertkorrektur
       if (byte2 === 0) {
-        return 'value correction, absolute position ' + (byte3 * 5) + ' %';
+        return { aktion: 'Wertkorrektur', positionAbsolutPercent: byte3 * 5 };
       }
-      return 'value correction, unknown type: ' + byte2;
-    case 4: // set/delete lock
-      if (byte2 === 0) {
-        return 'no lock';
-      } else {
-        switch (byte2 &amp; 3) {
-          case 1: return 'driving command';
-          case 2: return 'button lock';
-          case 3: return 'driving command- and button lock';
-        }
-        if (byte3 === 0) {
-          return 'delete lock';
-        } else {
-          return 'set lock';
-        }
+      return { aktion: 'Wertkorrektur', unbekannterTyp: byte2 };
+    case 3: // Automatikzustand
+      return { modus: byte2, typ: byte3, nummerP3: byte4, nummerP4: byte5 };
+    case 4: { // Sperre setzen/löschen
+      const fahrbefehlsperre = (byte2 &amp; 1) === 1 ? 'ändern' : 'belassen';
+      const tastersperre = (byte2 &amp; 2) === 2 ? 'ändern' : 'belassen';
+      const aktion = (byte3 &amp; 1) === 1 ? 'setzen' : 'löschen';
+
+      if (fahrbefehlsperre === 'belassen' &amp;&amp; tastersperre === 'belassen') {
+        return { aktion: 'keine Sperrenänderung' };
       }
-    case 5: { // operation code
+
+      const targets = [];
+      if (fahrbefehlsperre === 'ändern') targets.push('Fahrbefehlsperre');
+      if (tastersperre === 'ändern') targets.push('Tastersperre');
+
+      return { aktion: 'Sperre ' + aktion, targets };
+    }
+    case 5: { // Bedienungs Code
       if (byte2 &lt;= 6) {
-        commandOperation = 'groupoperation';
+        commandOperation = 'Gruppenbedienung';
       } else if (byte2 >= 128 &amp;&amp; byte2 &lt;= 134) {
-        commandOperation = 'localoperation';
+        commandOperation = 'Lokalbedienung';
       } else {
-        commandOperation = 'unknown command byte3 for ' + byte2;
+        commandOperation = 'unbekannter Bedienungs Code für ' + byte2;
       }
       const subCommands = [
-        'long up',
-        'long down',
-        'short up',
-        'short down',
-        'stop',
-        'long-short up',
-        'long-short down'
+        'Lang auf',
+        'Lang ab',
+        'Kurz auf',
+        'Kurz ab',
+        'Stop',
+        'Lang-Kurz auf',
+        'Lang-Kurz ab'
       ];
       const subCmdIdx = byte2 &amp; 127;
-      const subCmd = subCommands[subCmdIdx] || ('unknown command byte3 for ' + byte2);
-      return [commandOperation, subCmd];
+      const subCmd = subCommands[subCmdIdx] || ('unbekannter Befehl ' + byte2);
+      return { bedienung: commandOperation, unterbefehl: subCmd };
     }
-    case 11: // bus monitoring
-      return 'bus monitoring ' + (byte2 === 0 ? 'Off' : 'On');
+    case 6: // Szene setzen
+      return { aktion: 'Szene setzen', szenenNr: byte2 };
+    case 7: { // Sonderbefehl
+      const sonderbefehle = { 0: 'Normalbetrieb + Reset', 1: 'Testmodus', 2: 'Grundeinstellung' };
+      return { aktion: 'Sonderbefehl', befehl: sonderbefehle[byte2] || ('unbekannt ' + byte2) };
+    }
+    case 8: // Datum
+      return { jahr: byte2, monat: byte3, tag: byte4 };
+    case 9: // Zeit synchronisieren
+      if (byte2 === 255) {
+        return { aktion: 'synchronisieren' };
+      }
+      return { stunden: byte2, minuten: byte3 };
+    case 10: // Sensorwertmitteilung
+      return { kanalnummer: byte2, wertHigh: byte3, wertLow: byte4 };
+    case 11: // Busüberwachung
+      if (byte2 === 0) return { aktion: 'Überwachung aus' };
+      return { aktion: 'Busüberwachung', zykluszeit: byte2 };
     case 16:
-    case 17:
     case 19:
-    case 20:
     case 22:
-    case 23:
-    case 24: // driving range limits
-      return ['min. angle: ' + byte2, 'max. angle: ' + byte3, 'min. height: ' + byte4, 'max. height: ' + byte5];
-    default: return 'unknown value for command: ' + command;
+    case 24: { // Fahrbereichsgrenzen (Winkel / Höhe)
+      const res = { minWinkel: byte2, maxWinkel: byte3 };
+      if (command === 24) {
+        res.minPosHoehe = byte4;
+        res.maxPosHoehe = byte5;
+      } else {
+        res.minBehanghoehe = byte4;
+        res.maxBehanghoehe = byte5;
+      }
+      return res;
+    }
+    case 17:
+    case 20:
+    case 23: // Fahrbereichsgrenzen Position
+      return { minPosition: byte2, maxPosition: byte3 };
+    default: return { error: 'unbekannter Befehl: ' + command };
   }
 }
 
 /**
  * Decode a Griesser object from a hex string.
+ *
+ * Decoding is based on the official _KNX Non-Standard Datapoint Type Description Form_ filed by Griesser.
+ *
  * @param {string} hex
  * @returns {{
  *   sector: number|Group|string,
@@ -336,7 +380,7 @@ module.exports = {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.4</a> on Tue Jun 09 2026 21:33:18 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.4</a> on Tue Jun 09 2026 21:52:39 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

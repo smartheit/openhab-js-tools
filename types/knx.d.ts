@@ -5,7 +5,7 @@
  *   sector: number|Group|string,
  *   sectors: number[],
  *   command: { raw: number, type: string },
- *   priority: { raw: number, type: string },
+ *   priority: { raw: number, type: string }|null,
  *   data: any,
  *   raw: string,
  *   byte0: number,
@@ -28,7 +28,7 @@ export function decodeGriesserObject(hex: string): {
     priority: {
         raw: number;
         type: string;
-    };
+    } | null;
     data: any;
     raw: string;
     byte0: number;

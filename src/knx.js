@@ -214,7 +214,7 @@ function griesserParameter (command, byte2, byte3, byte4, byte5) {
  *   sector: number|Group|string,
  *   sectors: number[],
  *   command: { raw: number, type: string },
- *   priority: { raw: number, type: string },
+ *   priority: { raw: number, type: string }|null,
  *   data: any,
  *   raw: string,
  *   byte0: number,

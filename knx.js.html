@@ -56,112 +56,266 @@
 }
 
 /**
- * Decodes the sector byte.
- * @param {number} b raw sector byte (0-255)
+ * Decodes the 10-bit sector code.
+ * @param {number} sectorCode raw sector code (0-1023)
  * @returns {number|Group|string} the sector number, group of sectors, or 'reserved' if reserved byte
  */
-function decodeSector (b) {
-  if (b === 0) return 'reserved';
+function decodeGriesserSector (sectorCode) {
+  if (sectorCode === 0) return 'reserved';
 
   // Check if the least significant bit is 1 (individual sector)
-  if ((b &amp; 0x01) === 1) {
-    return (b >> 1) + 1;
+  if ((sectorCode &amp; 0x01) === 1) {
+    return (sectorCode >> 1) + 1;
   }
 
   // Group of sectors
-  const groupSize = b &amp; -b; // Lowest set bit value
+  const groupSize = sectorCode &amp; -sectorCode; // Lowest set bit value
 
   // Calculate shift based on the position of the lowest set bit
   const shift = groupSize.toString(2).length;
-  const baseSector = (b >> shift) * groupSize;
+  const baseSector = (sectorCode >> shift) * groupSize;
 
   return new Group(baseSector, baseSector + groupSize, groupSize);
 }
 
 /**
+ * Returns the English command name for a command code.
+ * @param {number} command
+ * @returns {string}
+ */
+function griesserCommand (command) {
+  switch (command) {
+    case 1: return 'drive command';
+    case 2: return 'value correction';
+    case 3: return 'automatic state';
+    case 4: return 'set/delete lock';
+    case 5: return 'operation code';
+    case 6: return 'set scene';
+    case 7: return 'special command';
+    case 8: return 'date';
+    case 9: return 'sync time';
+    case 10: return 'sensor reading notification';
+    case 11: return 'bus monitoring';
+    case 16: return 'driving range limits for safety drive commands';
+    case 17: return 'driving range limits for safety drive commands';
+    case 19: return 'driving range limits for safety drive commands';
+    case 20: return 'driving range limits for safety drive commands';
+    case 22: return 'driving range limits for automatic drive commands';
+    case 23: return 'driving range limits for automatic drive commands';
+    case 24: return 'driving range limits for automatic drive commands';
+    default: return 'unknown value for function: ' + command;
+  }
+}
+
+/**
  * Decodes the command byte.
- * @param {number} b raw sector byte (0-255)
+ * @param {number} commandCode raw command code (0-63)
  * @returns {{ raw: number, type: string }} raw value and human-readable type
  */
-function decodeCommand (b) {
-  const raw = b >> 2;
-  let type = null;
-  switch (raw) {
-    case 1:
-      type = 'fahrbefehl';
-      break;
-  }
+function decodeGriesserCommand (commandCode) {
+  const type = griesserCommand(commandCode);
   return {
-    raw,
+    raw: commandCode,
     type
   };
 }
 
 /**
- * Decodes the P1 byte.
- * @param {number} p1 raw P1 byte
- * @returns {{priority: number, type: string|null}} priority and type
+ * Decodes the 10-bit sector code into individual sector numbers.
+ * @param {number} sectorCode
+ * @returns {number[]}
  */
-function decodeP1 (p1) {
-  const priority = p1 >> 4; // shift right by 4 to get the upper nibble
-
-  let type = null;
-  switch (priority) {
-    case 0:
-    case 1:
-      // Limit/Boundary Command
-      type = 'grenzbefehl';
-      break;
-    case 2:
-    case 3:
-      // Automatic (Sun/Time)
-      type = 'automatikbefehl';
-      break;
-    case 6:
-    case 7:
-      // Priority Override
-      type = 'prioritaetsbefehl';
-      break;
-    case 8:
-    case 9:
-      // Warning (e.g., Wind/Rain)
-      type = 'warnbefehl';
-      break;
-    case 10:
-    case 11:
-      // Safety Lock
-      type = 'sicherheitsbefehl';
-      break;
-    case 12:
-    case 13:
-      // Danger/Emergency
-      type = 'gefahrenbefehl';
-      break;
+function griesserSectors (sectorCode) {
+  const decoded = decodeGriesserSector(sectorCode);
+  if (decoded === 'reserved') {
+    return [0];
   }
+  if (decoded instanceof Group) {
+    const sectors = [];
+    for (let i = decoded.start + 1; i &lt;= decoded.end; i++) {
+      sectors.push(i);
+    }
+    return sectors;
+  }
+  if (typeof decoded === 'number') {
+    return [decoded];
+  }
+  return [0];
+}
 
+/**
+ * Decodes the English priority description.
+ * @param {number} prioCommand priority command / executions
+ * @returns {string}
+ */
+function griesserPrio (prioCommand) {
+  switch (prioCommand) {
+    case 0: return 'border command';
+    case 1: return 'automatic command';
+    case 3: return 'priority command';
+    case 4: return 'warning command';
+    case 5: return 'security command';
+    case 6: return 'danger command';
+    default: return 'unknown priority ' + prioCommand;
+  }
+}
+
+/**
+ * Decodes the priority object containing raw priority value and English priority type description.
+ * @param {number} commandCode raw command code (0-63)
+ * @param {number} byte2 byte2 value containing priority info
+ * @returns {{ raw: number, type: string }|null}
+ */
+function decodeGriesserPrio (commandCode, byte2) {
+  if (commandCode !== 0) return null;
+  const prioCommand = byte2 >> 5;
   return {
-    priority,
-    type
+    raw: prioCommand &amp; 7,
+    type: griesserPrio(prioCommand)
   };
 }
 
 /**
- * Decode a Grieesser object from a hex string.
- * @param hex
- * @return {{sector: number|Group|string, command: {raw: number, type: string}, priority: {priority: number, type: (string|null)}, raw: string}}
+ * Decodes the parameter/data bytes based on the command.
+ * @param {number} command
+ * @param {number} byte2
+ * @param {number} byte3
+ * @param {number} byte4
+ * @param {number} byte5
+ * @returns {any}
+ */
+function griesserParameter (command, byte2, byte3, byte4, byte5) {
+  let commandOperation;
+  switch (command) {
+    case 1: // drive command
+      switch (byte2 &amp; 31) {
+        case 0: return 'no driving movement';
+        case 1: return 'upper end position';
+        case 2: return 'lower end position';
+        case 3:
+          if ((byte3 >= 1) &amp;&amp; (byte3 &lt;= 4)) {
+            return 'fixed position P' + byte3 + ' approach';
+          } else {
+            return 'Unknown value for Pn ' + byte3;
+          }
+        default:
+          return 'Unknown drive command ' + (byte2 &amp; 31);
+      }
+    case 2: // value correction
+      if (byte2 === 0) {
+        return 'value correction, absolute position ' + (byte3 * 5) + ' %';
+      }
+      return 'value correction, unknown type: ' + byte2;
+    case 4: // set/delete lock
+      if (byte2 === 0) {
+        return 'no lock';
+      } else {
+        switch (byte2 &amp; 3) {
+          case 1: return 'driving command';
+          case 2: return 'button lock';
+          case 3: return 'driving command- and button lock';
+        }
+        if (byte3 === 0) {
+          return 'delete lock';
+        } else {
+          return 'set lock';
+        }
+      }
+    case 5: { // operation code
+      if (byte2 &lt;= 6) {
+        commandOperation = 'groupoperation';
+      } else if (byte2 >= 128 &amp;&amp; byte2 &lt;= 134) {
+        commandOperation = 'localoperation';
+      } else {
+        commandOperation = 'unknown command byte3 for ' + byte2;
+      }
+      const subCommands = [
+        'long up',
+        'long down',
+        'short up',
+        'short down',
+        'stop',
+        'long-short up',
+        'long-short down'
+      ];
+      const subCmdIdx = byte2 &amp; 127;
+      const subCmd = subCommands[subCmdIdx] || ('unknown command byte3 for ' + byte2);
+      return [commandOperation, subCmd];
+    }
+    case 11: // bus monitoring
+      return 'bus monitoring ' + (byte2 === 0 ? 'Off' : 'On');
+    case 16:
+    case 17:
+    case 19:
+    case 20:
+    case 22:
+    case 23:
+    case 24: // driving range limits
+      return ['min. angle: ' + byte2, 'max. angle: ' + byte3, 'min. height: ' + byte4, 'max. height: ' + byte5];
+    default: return 'unknown value for command: ' + command;
+  }
+}
+
+/**
+ * Decode a Griesser object from a hex string.
+ * @param {string} hex
+ * @returns {{
+ *   sector: number|Group|string,
+ *   sectors: number[],
+ *   command: { raw: number, type: string },
+ *   priority: { raw: number, type: string },
+ *   data: any,
+ *   raw: string,
+ *   byte0: number,
+ *   byte1: number,
+ *   byte2: number,
+ *   byte3: number,
+ *   byte4: number,
+ *   byte5: number,
+ *   sectorCode: number,
+ *   commandCode: number
+ * }}
  */
 function decodeGriesserObject (hex) {
+  if (!hex || typeof hex !== 'string') {
+    throw new Error('Invalid hex string');
+  }
   const hexBytes = hex
     .replace(/\s+/g, '') // Remove spaces
     .match(/.{1,2}/g); // Chunk into pairs
+  if (!hexBytes || hexBytes.length !== 6) {
+    throw new Error('Invalid hex string');
+  }
   const bytes = hexBytes.map(h => parseInt(h, 16));
-  if (!bytes || bytes.length !== 6) throw new Error('Invalid hex string');
+  if (bytes.some(isNaN)) {
+    throw new Error('Invalid hex string');
+  }
+
+  const byte0 = bytes[0];
+  const byte1 = bytes[1];
+  const byte2 = bytes[2];
+  const byte3 = bytes[3];
+  const byte4 = bytes[4];
+  const byte5 = bytes[5];
+
+  const sectorCode = byte0 + (byte1 &amp; 3) * 256;
+  const commandCode = byte1 >> 2;
 
   return {
-    sector: decodeSector(bytes[0]),
-    command: decodeCommand(bytes[1]),
-    priority: decodeP1(bytes[2]),
-    raw: hexBytes.map(h => h.toUpperCase()).join(' ')
+    sector: decodeGriesserSector(sectorCode),
+    sectors: griesserSectors(sectorCode),
+    command: decodeGriesserCommand(commandCode),
+    priority: decodeGriesserPrio(commandCode, byte2),
+    data: griesserParameter(commandCode, byte2, byte3, byte4, byte5),
+    raw: hexBytes.map(h => h.toUpperCase()).join(' '),
+    byte0,
+    byte1,
+    byte2,
+    byte3,
+    byte4,
+    byte5,
+    sectorCode,
+    commandCode
   };
 }
 
@@ -182,7 +336,7 @@ module.exports = {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.4</a> on Thu Mar 05 2026 18:26:05 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.4</a> on Tue Jun 09 2026 21:22:39 GMT+0000 (Coordinated Universal Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

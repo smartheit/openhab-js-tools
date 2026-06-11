@@ -9,14 +9,7 @@ describe('knx', () => {
       expect(result.command.raw).toBe(1);
       expect(result.command.type).toBe('Fahrbefehl');
       expect(result.priority).toBeNull();
-      expect(result.byte0).toBe(0x47);
-      expect(result.byte1).toBe(0x04);
-      expect(result.byte2).toBe(0x63);
-      expect(result.byte3).toBe(0x04);
-      expect(result.byte4).toBe(0x00);
-      expect(result.byte5).toBe(0x00);
       expect(result.sectorCode).toBe(71);
-      expect(result.commandCode).toBe(1);
       expect(result.sectors).toEqual([36]);
       expect(result.data).toEqual({ aktion: 'Fixposition Pn anfahren', position: 4 });
       expect(result.raw).toBe(hex);
@@ -30,7 +23,6 @@ describe('knx', () => {
       expect(result.command.type).toBe('Fahrbefehl');
       expect(result.priority).toBeNull();
       expect(result.sectorCode).toBe(7);
-      expect(result.commandCode).toBe(1);
       expect(result.sectors).toEqual([4]);
       expect(result.data).toEqual({ aktion: 'Wippen Auf', wippdauer: 0 });
       expect(result.raw).toBe(hex);
@@ -42,7 +34,7 @@ describe('knx', () => {
       expect(result.sector).toBe(257);
       expect(result.sectorCode).toBe(513);
       expect(result.sectors).toEqual([257]);
-      expect(result.commandCode).toBe(5);
+      expect(result.command.raw).toBe(5);
       expect(result.command.type).toBe('Bedienungs Code');
       expect(result.priority).toBeNull();
       expect(result.data).toEqual({ bedienung: 'Lokalbedienung', unterbefehl: 'Kurz auf' });
@@ -54,7 +46,7 @@ describe('knx', () => {
       expect(result.sector).toBe(3);
       expect(result.sectorCode).toBe(5);
       expect(result.sectors).toEqual([3]);
-      expect(result.commandCode).toBe(0);
+      expect(result.command.raw).toBe(0);
       expect(result.command.type).toBe('unbekannter Befehl: 0');
       expect(result.priority.raw).toBe(3);
       expect(result.priority.type).toBe('Prioritätsbefehl');

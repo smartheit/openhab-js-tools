@@ -11,14 +11,7 @@
  *   priority: { raw: number, type: string }|null,
  *   data: any,
  *   raw: string,
- *   byte0: number,
- *   byte1: number,
- *   byte2: number,
- *   byte3: number,
- *   byte4: number,
- *   byte5: number,
- *   sectorCode: number,
- *   commandCode: number
+ *   sectorCode: number
  * }}
  */
 export function decodeGriesserObject(hex: string): {
@@ -34,14 +27,7 @@ export function decodeGriesserObject(hex: string): {
     } | null;
     data: any;
     raw: string;
-    byte0: number;
-    byte1: number;
-    byte2: number;
-    byte3: number;
-    byte4: number;
-    byte5: number;
     sectorCode: number;
-    commandCode: number;
 };
 declare class Group {
     constructor(start: any, end: any, size: any);

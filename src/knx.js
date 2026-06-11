@@ -261,14 +261,7 @@ function griesserParameter (command, byte2, byte3, byte4, byte5) {
  *   priority: { raw: number, type: string }|null,
  *   data: any,
  *   raw: string,
- *   byte0: number,
- *   byte1: number,
- *   byte2: number,
- *   byte3: number,
- *   byte4: number,
- *   byte5: number,
- *   sectorCode: number,
- *   commandCode: number
+ *   sectorCode: number
  * }}
  */
 function decodeGriesserObject (hex) {
@@ -303,14 +296,7 @@ function decodeGriesserObject (hex) {
     priority: decodeGriesserPrio(commandCode, byte2),
     data: griesserParameter(commandCode, byte2, byte3, byte4, byte5),
     raw: hexBytes.map(h => h.toUpperCase()).join(' '),
-    byte0,
-    byte1,
-    byte2,
-    byte3,
-    byte4,
-    byte5,
-    sectorCode,
-    commandCode
+    sectorCode
   };
 }
 
